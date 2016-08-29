@@ -28,6 +28,9 @@ jQuery(function($){
             IO.socket.on('playerJoinedRoom', IO.playerJoinedRoom );
             IO.socket.on('beginNewGame', IO.beginNewGame );
             IO.socket.on('newWordData', IO.onNewWordData);
+			
+			IO.socket.on('simonsTurn', IO.onSimonsTurn);
+			
             IO.socket.on('hostCheckAnswer', IO.hostCheckAnswer);
             IO.socket.on('gameOver', IO.gameOver);
             IO.socket.on('error', IO.error );
@@ -82,6 +85,22 @@ jQuery(function($){
 
             // Change the word for the Host and Player
             App[App.myRole].newWord(data);
+        },
+		
+		onSimonsTurn : function(data) {
+            App.currentRound = data.round;
+
+            App[App.myRole].newWord(data);
+			
+			if(App.myRole === 'Host') {
+                //Go simon
+            }
+			
+			if(App.myRole == 'Player') {
+				if(data.round == 0) {
+					App.Player.layoutButtons(data);
+				}
+			}
         },
 
         /**
@@ -188,7 +207,7 @@ jQuery(function($){
          * *********************************** */
 
         /**
-         * Show the initial Anagrammatix Title Screen
+         * Show the initial Title Screen
          * (with Start and Join buttons)
          */
         showInitScreen: function() {
@@ -223,7 +242,15 @@ jQuery(function($){
              * A reference to the correct answer for the current round.
              */
             currentCorrectAnswer: '',
-
+			
+			
+			/**
+             * Simon's moves.
+             */
+			
+			moves : [],
+			
+			
             /**
              * Handler for the "Start" button on the Title Screen.
              */
@@ -464,7 +491,7 @@ jQuery(function($){
              *  Click handler for the Player hitting a word in the word list.
              */
             onPlayerAnswerClick: function() {
-                // console.log('Clicked Answer Button');
+                console.log('Clicked Answer Button');
                 var $btn = $(this);      // the tapped button
                 var answer = $btn.val(); // The tapped word
 
@@ -541,6 +568,26 @@ jQuery(function($){
                 });
 
                 // Insert the list onto the screen.
+                $('#gameArea').html($list);
+            },
+			
+			
+			//Layout simon says buttons
+			layoutButtons : function(data) {
+                var $list = $('<ul/>').attr('id','ulAnswers');
+
+                $.each(data.list, function(){
+                    $list                         
+                        .append( $('<li/>')          
+                            .append( $('<button/>')     
+                                .addClass('btnAnswer')  
+                                .addClass('btn')       
+                                .val(this)         
+                                .html('button')      
+                            )
+                        )
+                });
+				
                 $('#gameArea').html($list);
             },
 
