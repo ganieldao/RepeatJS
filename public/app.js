@@ -29,7 +29,7 @@ jQuery(function($){
             IO.socket.on('beginNewGame', IO.beginNewGame );
             IO.socket.on('newWordData', IO.onNewWordData);
 			
-			IO.socket.on('simonsTurn', IO.onSimonsTurn);
+			IO.socket.on('newMovesData', IO.onNewMovesData);
 			
             IO.socket.on('hostCheckAnswer', IO.hostCheckAnswer);
             IO.socket.on('gameOver', IO.gameOver);
@@ -87,20 +87,22 @@ jQuery(function($){
             App[App.myRole].newWord(data);
         },
 		
-		onSimonsTurn : function(data) {
+		onNewMovesData : function(data) {
+			console.log('onnewmoves');
+            // Update the current round
             App.currentRound = data.round;
 
-            App[App.myRole].newWord(data);
-			
+            // Change the word for the Host and Player
+            //App[App.myRole].newWord(data);
+
 			if(App.myRole === 'Host') {
-                //Go simon
-            }
-			
-			if(App.myRole == 'Player') {
+				App.Host.newMoves(data);
+			} else if(App.myRole == 'Player') {
 				if(data.round == 0) {
-					App.Player.layoutButtons(data);
+					App.Player.layoutButtons();
 				}
 			}
+			console.log('onnewmovesend');
         },
 
         /**
@@ -359,6 +361,16 @@ jQuery(function($){
                 App.Host.currentCorrectAnswer = data.answer;
                 App.Host.currentRound = data.round;
             },
+			
+			newMoves : function(data) {
+                // Insert the new word into the DOM
+                //$('#hostWord').text(data.word);
+                //App.doTextFit('#hostWord');
+
+				App.Host.moves.concat(data.moves);
+				console.log(App.Host.moves);
+                App.Host.currentRound = data.round;
+            },
 
             /**
              * Check the answer clicked by a player.
@@ -573,16 +585,17 @@ jQuery(function($){
 			
 			
 			//Layout simon says buttons
-			layoutButtons : function(data) {
+			layoutButtons : function() {
                 var $list = $('<ul/>').attr('id','ulAnswers');
-
-                $.each(data.list, function(){
+				
+				var data = [1, 2, 3 ,4];
+				
+                $.each(data, function(){
                     $list                         
                         .append( $('<li/>')          
                             .append( $('<button/>')     
                                 .addClass('btnAnswer')  
-                                .addClass('btn')       
-                                .val(this)         
+                                .addClass('btn')               
                                 .html('button')      
                             )
                         )

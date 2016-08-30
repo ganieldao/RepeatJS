@@ -64,7 +64,8 @@ function hostPrepareGame(gameId) {
  */
 function hostStartGame(gameId) {
     console.log('Game Started.');
-    sendWord(0,gameId);
+    //sendWord(0,gameId);
+	sendMoves(0, 3, gameId);
 };
 
 /**
@@ -72,13 +73,13 @@ function hostStartGame(gameId) {
  * @param data Sent from the client. Contains the current round and gameId (room)
  */
 function hostNextRound(data) {
-    if(data.round < wordPool.length ){
+    /*if(data.round < wordPool.length ){
         // Send a new set of words back to the host and players.
         sendWord(data.round, data.gameId);
     } else {
         // If the current round exceeds the number of words, send the 'gameOver' event.
         io.sockets.in(data.gameId).emit('gameOver',data);
-    }
+    }*/
 }
 /* *****************************
    *                           *
@@ -159,6 +160,25 @@ function playerRestart(data) {
 function sendWord(wordPoolIndex, gameId) {
     var data = getWordData(wordPoolIndex);
     io.sockets.in(data.gameId).emit('newWordData', data);
+}
+
+function sendMoves(round, numberOfMoves, gameId) {
+	var data = generateMoves(round, numberOfMoves)
+	io.sockets.in(data.gameId).emit('newMovesData', data);
+}
+
+function generateMoves(round, numberOfMoves) {
+	var newMoves = [];
+	for(i = 0; i < numberOfMoves; i ++) {
+		newMoves[i] = Math.floor(Math.random() * 4);
+	}
+	
+	var data = {
+		moves: newMoves,
+		round:round
+	};
+	console.log(data);
+	return data;
 }
 
 /**
