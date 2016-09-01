@@ -163,6 +163,7 @@ function sendWord(wordPoolIndex, gameId) {
 }
 
 function sendMoves(round, numberOfMoves, gameId) {
+	console.log('sendMoves');
 	var data = generateMoves(round, numberOfMoves)
 	io.sockets.in(data.gameId).emit('newMovesData', data);
 }

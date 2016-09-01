@@ -74,18 +74,6 @@ jQuery(function($){
         beginNewGame : function(data) {
             App[App.myRole].gameCountdown(data);
         },
-
-        /**
-         * A new set of words for the round is returned from the server.
-         * @param data
-         */
-        onNewWordData : function(data) {
-            // Update the current round
-            App.currentRound = data.round;
-
-            // Change the word for the Host and Player
-            App[App.myRole].newWord(data);
-        },
 		
 		onNewMovesData : function(data) {
 			console.log('onnewmoves');
@@ -99,7 +87,7 @@ jQuery(function($){
 				App.Host.newMoves(data);
 			} else if(App.myRole == 'Player') {
 				if(data.round == 0) {
-					App.Player.layoutButtons();
+					App.Player.layoutButtons(data);
 				}
 			}
 			console.log('onnewmovesend');
@@ -200,7 +188,7 @@ jQuery(function($){
             // Player
             App.$doc.on('click', '#btnJoinGame', App.Player.onJoinClick);
             App.$doc.on('click', '#btnStart',App.Player.onPlayerStartClick);
-            App.$doc.on('click', '.btnAnswer',App.Player.onPlayerAnswerClick);
+            App.$doc.on('click', '.btnAnswer',App.Player.onPlayerButtonClick);
             App.$doc.on('click', '#btnPlayerRestart', App.Player.onPlayerRestart);
         },
 
@@ -347,27 +335,13 @@ jQuery(function($){
                 $('#player1Score').find('.score').attr('id',App.Host.players[0].mySocketId);
                 $('#player2Score').find('.score').attr('id',App.Host.players[1].mySocketId);
             },
-
-            /**
-             * Show the word for the current round on screen.
-             * @param data{{round: *, word: *, answer: *, list: Array}}
-             */
-            newWord : function(data) {
-                // Insert the new word into the DOM
-                $('#hostWord').text(data.word);
-                App.doTextFit('#hostWord');
-
-                // Update the data for the current round
-                App.Host.currentCorrectAnswer = data.answer;
-                App.Host.currentRound = data.round;
-            },
 			
 			newMoves : function(data) {
                 // Insert the new word into the DOM
                 //$('#hostWord').text(data.word);
                 //App.doTextFit('#hostWord');
-
-				App.Host.moves.concat(data.moves);
+				
+				App.Host.moves = App.Host.moves.concat(data.moves);
 				console.log(App.Host.moves);
                 App.Host.currentRound = data.round;
             },
@@ -467,7 +441,12 @@ jQuery(function($){
              * The player's name entered on the 'Join' screen.
              */
             myName: '',
-
+			
+			
+			playerMoves: [],
+			
+			numberOfMoves: '',
+			
             /**
              * Click handler for the 'JOIN' button
              */
@@ -498,25 +477,28 @@ jQuery(function($){
                 App.myRole = 'Player';
                 App.Player.myName = data.playerName;
             },
-
-            /**
-             *  Click handler for the Player hitting a word in the word list.
-             */
-            onPlayerAnswerClick: function() {
-                console.log('Clicked Answer Button');
+			
+			onPlayerButtonClick: function() {
+				                console.log('Clicked Answer Button');
                 var $btn = $(this);      // the tapped button
                 var answer = $btn.val(); // The tapped word
-
-                // Send the player info and tapped word to the server so
-                // the host can check the answer.
-                var data = {
-                    gameId: App.gameId,
-                    playerId: App.mySocketId,
-                    answer: answer,
-                    round: App.currentRound
-                }
-                IO.socket.emit('playerAnswer',data);
-            },
+				
+				App.Player.playerMoves.push(answer);
+				console.log(App.Player.playerMoves.length);
+				if(App.Player.playerMoves.length == App.Player.numberOfMoves) {
+					console.log('send');
+					var data = {
+						gameId: App.gameId,
+						playerId: App.mySocketId,
+						answer: App.Player.playerMoves,
+						round: App.currentRound
+					}
+					IO.socket.emit('playerAnswer',data);
+					App.Player.playerMoves = [];
+				}
+			},
+			
+			
 
             /**
              *  Click handler for the "Start Again" button that appears
@@ -555,42 +537,20 @@ jQuery(function($){
                 App.Player.hostSocketId = hostData.mySocketId;
                 $('#gameArea')
                     .html('<div class="gameOver">Get Ready!</div>');
-            },
-
-            /**
-             * Show the list of words for the current round.
-             * @param data{{round: *, word: *, answer: *, list: Array}}
-             */
-            newWord : function(data) {
-                // Create an unordered list element
-                var $list = $('<ul/>').attr('id','ulAnswers');
-
-                // Insert a list item for each word in the word list
-                // received from the server.
-                $.each(data.list, function(){
-                    $list                                //  <ul> </ul>
-                        .append( $('<li/>')              //  <ul> <li> </li> </ul>
-                            .append( $('<button/>')      //  <ul> <li> <button> </button> </li> </ul>
-                                .addClass('btnAnswer')   //  <ul> <li> <button class='btnAnswer'> </button> </li> </ul>
-                                .addClass('btn')         //  <ul> <li> <button class='btnAnswer'> </button> </li> </ul>
-                                .val(this)               //  <ul> <li> <button class='btnAnswer' value='word'> </button> </li> </ul>
-                                .html(this)              //  <ul> <li> <button class='btnAnswer' value='word'>word</button> </li> </ul>
-                            )
-                        )
-                });
-
-                // Insert the list onto the screen.
-                $('#gameArea').html($list);
-            },
-			
+            },	
 			
 			//Layout simon says buttons
-			layoutButtons : function() {
+			layoutButtons : function(data) {
+				console.log('layout buttons');
                 var $list = $('<ul/>').attr('id','ulAnswers');
 				
-				var data = [1, 2, 3 ,4];
+				var numberOfButtons = [1, 2, 3 ,4];
 				
-                $.each(data, function(){
+				App.Player.numberOfMoves = data.moves.length;
+				
+				console.log('layout buttons length' + App.Player.numberOfMoves);
+				
+                $.each(numberOfButtons, function(){
                     $list                         
                         .append( $('<li/>')          
                             .append( $('<button/>')     
