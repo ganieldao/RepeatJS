@@ -171,7 +171,7 @@ function sendMoves(round, numberOfMoves, gameId) {
 function generateMoves(round, numberOfMoves) {
 	var newMoves = [];
 	for(i = 0; i < numberOfMoves; i ++) {
-		newMoves[i] = Math.floor(Math.random() * 4);
+		newMoves[i] = Math.floor(Math.random() * 4) + 1;
 	}
 	
 	var data = {

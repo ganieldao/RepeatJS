@@ -99,7 +99,7 @@ jQuery(function($){
          */
         hostCheckAnswer : function(data) {
             if(App.myRole === 'Host') {
-                App.Host.checkAnswer(data);
+                App.Host.checkMoves(data);
             }
         },
 
@@ -345,22 +345,22 @@ jQuery(function($){
 				console.log(App.Host.moves);
                 App.Host.currentRound = data.round;
             },
-
-            /**
-             * Check the answer clicked by a player.
-             * @param data{{round: *, playerId: *, answer: *, gameId: *}}
-             */
-            checkAnswer : function(data) {
+			
+			checkMoves : function(data) {
                 // Verify that the answer clicked is from the current round.
                 // This prevents a 'late entry' from a player whos screen has not
                 // yet updated to the current round.
+				console.log('check');
                 if (data.round === App.currentRound){
-
+					console.log('round pass');
                     // Get the player's score
                     var $pScore = $('#' + data.playerId);
-
+					
+					console.log(App.Host.moves);
+					console.log(data.moves);
                     // Advance player's score if it is correct
-                    if( App.Host.currentCorrectAnswer === data.answer ) {
+                    if( App.Host.moves.toString() === data.moves.toString() ) {
+						console.log('correct');
                         // Add 5 to the player's score
                         $pScore.text( +$pScore.text() + 5 );
 
@@ -382,6 +382,8 @@ jQuery(function($){
                     }
                 }
             },
+			
+			
 
 
             /**
@@ -442,6 +444,7 @@ jQuery(function($){
              */
             myName: '',
 			
+			canAnswer: false,
 			
 			playerMoves: [],
 			
@@ -483,14 +486,14 @@ jQuery(function($){
                 var $btn = $(this);      // the tapped button
                 var answer = $btn.val(); // The tapped word
 				
-				App.Player.playerMoves.push(answer);
+				App.Player.playerMoves.push(parseInt(answer));
 				console.log(App.Player.playerMoves.length);
 				if(App.Player.playerMoves.length == App.Player.numberOfMoves) {
 					console.log('send');
 					var data = {
 						gameId: App.gameId,
 						playerId: App.mySocketId,
-						answer: App.Player.playerMoves,
+						moves: App.Player.playerMoves,
 						round: App.currentRound
 					}
 					IO.socket.emit('playerAnswer',data);
@@ -555,8 +558,9 @@ jQuery(function($){
                         .append( $('<li/>')          
                             .append( $('<button/>')     
                                 .addClass('btnAnswer')  
-                                .addClass('btn')               
-                                .html('button')      
+                                .addClass('btn')
+								.val(this)
+                                .html(this)      
                             )
                         )
                 });
