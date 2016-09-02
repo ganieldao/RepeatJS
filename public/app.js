@@ -227,12 +227,6 @@ jQuery(function($){
              * Keep track of the number of players that have joined the game.
              */
             numPlayersInRoom: 0,
-
-            /**
-             * A reference to the correct answer for the current round.
-             */
-            currentCorrectAnswer: '',
-			
 			
 			/**
              * Simon's moves.
@@ -378,13 +372,11 @@ jQuery(function($){
 
                     } else {
                         // A wrong answer was submitted, so decrement the player's score.
+						console.log('wrong');
                         $pScore.text( +$pScore.text() - 3 );
                     }
                 }
             },
-			
-			
-
 
             /**
              * All 10 rounds have played out. End the game.
@@ -482,7 +474,7 @@ jQuery(function($){
             },
 			
 			onPlayerButtonClick: function() {
-				                console.log('Clicked Answer Button');
+				console.log('Clicked Answer Button');
                 var $btn = $(this);      // the tapped button
                 var answer = $btn.val(); // The tapped word
 				
@@ -499,9 +491,7 @@ jQuery(function($){
 					IO.socket.emit('playerAnswer',data);
 					App.Player.playerMoves = [];
 				}
-			},
-			
-			
+			},	
 
             /**
              *  Click handler for the "Start Again" button that appears
