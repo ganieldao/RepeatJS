@@ -5,6 +5,9 @@
        Lite : #ECFFE0
 Dark Purple : #A22FB0
 
+Background : #7B2828
+Lighter than Background : #955252
+Text : #ECFFE0
 */
 
 html, body {
@@ -128,7 +131,7 @@ html, body {
 }
 
 .createGameWrapper{
-    color: #AE37B2;
+    color: #ECFFE0;
     font-weight: 300;
 }
 
@@ -142,7 +145,7 @@ html, body {
     width: 200px;
     height: 60px;
     font-family: 'Quicksand', sans-serif;
-    color: #A22FB0;
+    color: #ECFFE0;
     font-weight: 300;
     font-size: 54px;
     border: 1px dotted white;
@@ -216,7 +219,7 @@ html, body {
     border-bottom: 1px dotted white;
     font-weight: 400;
     font-size: 3em;
-    color: #AE37B2;
+    color: #270c0c;
 }
 
 
@@ -281,12 +284,12 @@ html, body {
 
 .playerScore .score {
     text-align: center;
-    background-color: #A8FF56;
+    background-color: #c13e3e;
 }
 
 .playerScore .playerName {
     width: 77%;
-    background-color: #ECFFE0;
+    background-color: #955252;
 }
 
 #player1Score {
