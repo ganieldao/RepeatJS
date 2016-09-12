@@ -27,9 +27,9 @@ jQuery(function($){
             IO.socket.on('newGameCreated', IO.onNewGameCreated );
             IO.socket.on('playerJoinedRoom', IO.playerJoinedRoom );
             IO.socket.on('beginNewGame', IO.beginNewGame );
-            IO.socket.on('newWordData', IO.onNewWordData);
 			
 			IO.socket.on('newMovesData', IO.onNewMovesData);
+			IO.socket.on('playerLayoutButtons', IO.onPlayerLayoutButtons);
 			
             IO.socket.on('hostCheckAnswer', IO.hostCheckAnswer);
             IO.socket.on('gameOver', IO.gameOver);
@@ -85,12 +85,15 @@ jQuery(function($){
 
 			if(App.myRole === 'Host') {
 				App.Host.newMoves(data);
-			} else if(App.myRole == 'Player') {
-				if(data.round == 0) {
-					App.Player.layoutButtons(data);
-				}
 			}
+			
 			console.log('onnewmovesend');
+        },
+		
+		onPlayerLayoutButtons : function(data) {
+			if(App.myRole === 'Player') {
+				App.Player.layoutButtons(data);
+			}
         },
 
         /**
@@ -338,6 +341,14 @@ jQuery(function($){
 				App.Host.moves = App.Host.moves.concat(data.moves);
 				console.log(App.Host.moves);
                 App.Host.currentRound = data.round;
+				
+				var data = {
+                        gameId : App.gameId,
+                        round : App.currentRound,
+						moves : App.Host.moves
+                    }
+				
+				IO.socket.emit('hostNewMovesFinished', data);
             },
 			
 			checkMoves : function(data) {

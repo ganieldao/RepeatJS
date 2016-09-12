@@ -17,6 +17,9 @@ exports.initGame = function(sio, socket){
     gameSocket.on('hostRoomFull', hostPrepareGame);
     gameSocket.on('hostCountdownFinished', hostStartGame);
     gameSocket.on('hostNextRound', hostNextRound);
+	
+	gameSocket.on('hostNewMovesFinished', hostNewMovesFinished);
+
 
     // Player Events
     gameSocket.on('playerJoinGame', playerJoinGame);
@@ -65,6 +68,12 @@ function hostPrepareGame(gameId) {
 function hostStartGame(gameId) {
     console.log('Game Started.');
 	sendMoves(0, 3, gameId);
+};
+
+//Data contains gameId, moves, round
+function hostNewMovesFinished(data) {
+    console.log('Host finished, here the moves');
+	io.sockets.in(data.gameId).emit('playerLayoutButtons', data);
 };
 
 /**
