@@ -348,7 +348,27 @@ jQuery(function($){
 						moves : App.Host.moves
                     }
 				
-				IO.socket.emit('hostNewMovesFinished', data);
+				
+				var numberOfMoves = App.Host.moves.length;
+				var currentMove = 0;
+				var timer = setInterval(countItDown,1000);
+				function countItDown(){				
+					console.log("count");
+					$('#hostWord').text(App.Host.moves[currentMove]);
+					App.doTextFit('#hostWord');
+
+					currentMove ++;
+					
+					if(currentMove > numberOfMoves){
+						// console.log('Countdown Finished.');
+	
+						// Stop the timer and do the callback.
+						clearInterval(timer);
+						IO.socket.emit('hostNewMovesFinished', data);
+						return;
+					}
+				}
+				
             },
 			
 			checkMoves : function(data) {
