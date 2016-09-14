@@ -88,6 +88,8 @@ function hostNextRound(data) {
         // If the current round exceeds the number of words, send the 'gameOver' event.
         io.sockets.in(data.gameId).emit('gameOver',data);
     }*/
+	
+	sendMoves(data.round, data.round, data.gameId);
 }
 /* *****************************
    *                           *

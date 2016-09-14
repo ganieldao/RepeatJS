@@ -334,10 +334,6 @@ jQuery(function($){
             },
 			
 			newMoves : function(data) {
-                // Insert the new word into the DOM
-                //$('#hostWord').text(data.word);
-                //App.doTextFit('#hostWord');
-				
 				App.Host.moves = App.Host.moves.concat(data.moves);
 				console.log(App.Host.moves);
                 App.Host.currentRound = data.round;
@@ -360,9 +356,6 @@ jQuery(function($){
 					currentMove ++;
 					
 					if(currentMove > numberOfMoves){
-						// console.log('Countdown Finished.');
-	
-						// Stop the timer and do the callback.
 						clearInterval(timer);
 						IO.socket.emit('hostNewMovesFinished', data);
 						return;
