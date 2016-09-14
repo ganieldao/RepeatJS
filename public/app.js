@@ -347,20 +347,38 @@ jQuery(function($){
 				
 				var numberOfMoves = App.Host.moves.length;
 				var currentMove = 0;
-				var timer = setInterval(countItDown,1000);
-				function countItDown(){				
-					console.log("count");
-					$('#hostWord').text(App.Host.moves[currentMove]);
+				
+				var readySetGo = ["", "Ready", "Go!"];
+				var currentReady = 0;
+				
+				var readyTimer = setInterval(readyTimerFunction,1000);
+				function readyTimerFunction() {
+					$('#hostWord').text(readySetGo[currentReady]);
 					App.doTextFit('#hostWord');
-
-					currentMove ++;
+					currentReady ++;
 					
-					if(currentMove > numberOfMoves){
-						clearInterval(timer);
-						IO.socket.emit('hostNewMovesFinished', data);
+					if(currentReady > readySetGo.length) {
+						clearInterval(readyTimer);
+						
+						var showMovesTimer = setInterval(showMovesTimerFunction,1000);
+						function showMovesTimerFunction(){				
+							console.log("count");
+							$('#hostWord').text(App.Host.moves[currentMove]);
+							App.doTextFit('#hostWord');
+
+							currentMove ++;
+					
+							if(currentMove > numberOfMoves){
+								clearInterval(showMovesTimer);
+								IO.socket.emit('hostNewMovesFinished', data);
+								return;
+							}
+						}
 						return;
 					}
 				}
+				
+
 				
             },
 			
