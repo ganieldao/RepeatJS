@@ -83,9 +83,7 @@ jQuery(function($){
             // Change the word for the Host and Player
             //App[App.myRole].newWord(data);
 
-			if(App.myRole === 'Host') {
-				App.Host.newMoves(data);
-			}
+			App[App.myRole].newMoves(data);
 			
 			console.log('onnewmovesend');
         },
@@ -150,6 +148,8 @@ jQuery(function($){
          * to the array of word data stored on the server.
          */
         currentRound: 0,
+		
+		maxPlayers: 5,
 
         /* *************************************
          *                Setup                *
@@ -296,7 +296,7 @@ jQuery(function($){
                 App.Host.numPlayersInRoom += 1;
 
                 // If two players have joined, start the game!
-                if (App.Host.numPlayersInRoom === 2) {
+                if (App.Host.numPlayersInRoom === App.maxPlayers) {
                     // console.log('Room is full. Almost ready!');
 
                     // Let the server know that two players are present.
@@ -573,6 +573,11 @@ jQuery(function($){
                 $('#gameArea')
                     .html('<div class="gameOver">Get Ready!</div>');
             },	
+			
+			newMoves : function(data) {
+				 $('#gameArea')
+                    .html('<div class="gameOver">Pay attention to the main screen!</div>');
+			},
 			
 			//Layout simon says buttons
 			layoutButtons : function(data) {
