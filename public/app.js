@@ -237,6 +237,7 @@ jQuery(function($){
 			
 			moves : [],
 			
+			speed : 1000,
 			
             /**
              * Handler for the "Start" button on the Title Screen.
@@ -319,7 +320,7 @@ jQuery(function($){
                     IO.socket.emit('hostCountdownFinished', App.gameId);
                 });
 
-                // Display the players' names on screen
+                /*// Display the players' names on screen
                 $('#player1Score')
                     .find('.playerName')
                     .html(App.Host.players[0].playerName);
@@ -330,7 +331,7 @@ jQuery(function($){
 
                 // Set the Score section on screen to 0 for each player.
                 $('#player1Score').find('.score').attr('id',App.Host.players[0].mySocketId);
-                $('#player2Score').find('.score').attr('id',App.Host.players[1].mySocketId);
+                $('#player2Score').find('.score').attr('id',App.Host.players[1].mySocketId);*/
             },
 			
 			newMoves : function(data) {
@@ -352,6 +353,9 @@ jQuery(function($){
 				var currentReady = 0;
 				
 				var readyTimer = setInterval(readyTimerFunction,1000);
+				
+				var pause = false;
+				
 				function readyTimerFunction() {
 					$('#hostWord').text(readySetGo[currentReady]);
 					App.doTextFit('#hostWord');
@@ -359,14 +363,19 @@ jQuery(function($){
 					
 					if(currentReady > readySetGo.length) {
 						clearInterval(readyTimer);
-						
-						var showMovesTimer = setInterval(showMovesTimerFunction,1000);
+						$('#hostWord').text("");
+						var showMovesTimer = setInterval(showMovesTimerFunction, App.Host.speed);
 						function showMovesTimerFunction(){				
-							console.log("count");
-							$('#hostWord').text(App.Host.moves[currentMove]);
-							App.doTextFit('#hostWord');
-
-							currentMove ++;
+							if(!pause) {
+								$('#hostWord').text(App.Host.moves[currentMove]);
+								App.doTextFit('#hostWord');
+								currentMove ++;
+								pause = true;
+							} else {
+								$('#hostWord').text("");
+								App.doTextFit('#hostWord');
+								pause = false;
+							}
 					
 							if(currentMove > numberOfMoves){
 								clearInterval(showMovesTimer);
