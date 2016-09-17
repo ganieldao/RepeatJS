@@ -336,16 +336,17 @@ jQuery(function($){
                 $('#player2Score').find('.score').attr('id',App.Host.players[1].mySocketId);*/
             },
 			
-			newMoves : function(data) {
+			newMoves : function(data) {				
+				var newMovesIndex = App.Host.moves.length;
 				App.Host.moves = App.Host.moves.concat(data.moves);
 				console.log(App.Host.moves);
                 App.Host.currentRound = data.round;
 				
 				var data = {
-                        gameId : App.gameId,
-                        round : App.currentRound,
-						moves : App.Host.moves
-                    }
+                    gameId : App.gameId,
+                    round : App.currentRound,
+					moves : App.Host.moves
+                }
 				
 				
 				var numberOfMoves = App.Host.moves.length;
@@ -359,6 +360,10 @@ jQuery(function($){
 				var pause = false;
 				
 				$('#timeLeftText').text("Preparation");
+				
+				$('#hostWord').css({
+					'color':'black'
+				});
 				
 				function readyTimerFunction() {
 					$('#hostWord').text(readySetGo[currentReady]);
@@ -380,6 +385,12 @@ jQuery(function($){
 								$('#hostWord').text("");
 								App.doTextFit('#hostWord');
 								pause = false;
+							}
+							
+							if(currentMove > newMovesIndex) {
+								$('#hostWord').css({
+									'color':'yellow'
+								});
 							}
 					
 							if(currentMove > numberOfMoves){
