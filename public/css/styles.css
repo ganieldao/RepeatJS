@@ -258,6 +258,20 @@ html, body {
     text-transform: uppercase;
 }
 
+#timeLeft {
+	height: 10%;
+    width: 100%;
+    position: fixed;
+    top: 0;
+}
+
+#timeLeftText {
+	text-align: center;
+	font-size: 100px;
+	font-family: 'Quicksand', sans-serif;
+    font-weight: 400;
+}
+
 #playerScores {
     height: 10%;
     width: 100%;
