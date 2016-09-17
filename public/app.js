@@ -319,6 +319,8 @@ jQuery(function($){
                 App.countDown( $secondsLeft, 5, function(){
                     IO.socket.emit('hostCountdownFinished', App.gameId);
                 });
+				
+				$('#timeLeftText').text("");
 
                 /*// Display the players' names on screen
                 $('#player1Score')
@@ -356,6 +358,8 @@ jQuery(function($){
 				
 				var pause = false;
 				
+				$('#timeLeftText').text("Preparation");
+				
 				function readyTimerFunction() {
 					$('#hostWord').text(readySetGo[currentReady]);
 					App.doTextFit('#hostWord');
@@ -365,6 +369,7 @@ jQuery(function($){
 						clearInterval(readyTimer);
 						$('#hostWord').text("");
 						var showMovesTimer = setInterval(showMovesTimerFunction, App.Host.speed);
+						$('#timeLeftText').text("Memorization");
 						function showMovesTimerFunction(){				
 							if(!pause) {
 								$('#hostWord').text(App.Host.moves[currentMove]);
@@ -378,6 +383,7 @@ jQuery(function($){
 							}
 					
 							if(currentMove > numberOfMoves){
+								$('#timeLeftText').text("Repeat!");
 								clearInterval(showMovesTimer);
 								IO.socket.emit('hostNewMovesFinished', data);
 								return;
