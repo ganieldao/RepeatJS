@@ -67,10 +67,6 @@ jQuery(function($){
             App[App.myRole].updateWaitingScreen(data);
         },
 
-        /**
-         * Both players have joined the game.
-         * @param data
-         */
         beginNewGame : function(data) {
             App[App.myRole].gameCountdown(data);
         },
@@ -190,7 +186,7 @@ jQuery(function($){
 
             // Player
             App.$doc.on('click', '#btnJoinGame', App.Player.onJoinClick);
-            App.$doc.on('click', '#btnStart',App.Player.onPlayerStartClick);
+            App.$doc.on('click', '#btnJoinStart',App.Player.onPlayerJoinClick);
             App.$doc.on('click', '.btnAnswer',App.Player.onPlayerButtonClick);
             App.$doc.on('click', '#btnPlayerRestart', App.Player.onPlayerRestart);
         },
@@ -218,6 +214,8 @@ jQuery(function($){
              * Contains references to player data
              */
             players : [],
+			
+			playersReady: 0,
 
             /**
              * Flag to indicate if a new game is starting.
@@ -295,6 +293,7 @@ jQuery(function($){
 
                 // Increment the number of players in the room
                 App.Host.numPlayersInRoom += 1;
+				console.log("players" + App.Host.numPlayersInRoom);
 
                 // If two players have joined, start the game!
                 if (App.Host.numPlayersInRoom === App.maxPlayers) {
@@ -426,23 +425,27 @@ jQuery(function($){
                         // Add 5 to the player's score
                         $pScore.text( +$pScore.text() + 5 );
 
-                        // Advance the round
-                        App.currentRound += 1;
-
-                        // Prepare data to send to the server
-                        var data = {
-                            gameId : App.gameId,
-                            round : App.currentRound
-                        }
-
-                        // Notify the server to start the next round.
-                        IO.socket.emit('hostNextRound',data);
-
                     } else {
                         // A wrong answer was submitted, so decrement the player's score.
 						console.log('wrong');
                         $pScore.text( +$pScore.text() - 3 );
                     }
+					
+									
+					App.Host.playersReady ++
+					console.log(App.Host.playersReady);
+					console.log(App.Host.numPlayersInRoom);
+					if(App.Host.playersReady === App.Host.numPlayersInRoom) {
+						App.Host.playersReady = 0;
+						App.currentRound += 1;
+				   
+						var data = {
+							gameId : App.gameId,
+							round : App.currentRound
+						}
+
+						IO.socket.emit('hostNextRound',data);
+					}
                 }
             },
 
@@ -524,8 +527,8 @@ jQuery(function($){
              * The player entered their name and gameId (hopefully)
              * and clicked Start.
              */
-            onPlayerStartClick: function() {
-                // console.log('Player clicked "Start"');
+            onPlayerJoinClick: function() {
+                console.log('Player clicked "Start"');
 
                 // collect data to send to the server
                 var data = {
@@ -539,7 +542,20 @@ jQuery(function($){
                 // Set the appropriate properties for the current player.
                 App.myRole = 'Player';
                 App.Player.myName = data.playerName;
+				
+				var $btn = $(this); 
+				$btn.text('Start');
+				$btn.unbind("click");
+				//App.$doc.on('click', '#btnJoinStart', App.Player.onPlayerStartClick);
             },
+			
+			onPlayerStartClick: function() {
+				var data = {
+                    gameId : +($('#inputGameId').val()),
+                    playerName : $('#inputPlayerName').val() || 'anon'
+                };
+				IO.socket.emit('playerStartGame', data);
+			},
 			
 			onPlayerButtonClick: function() {
 				console.log('Clicked Answer Button');

@@ -20,8 +20,8 @@ exports.initGame = function(sio, socket){
 	
 	gameSocket.on('hostNewMovesFinished', hostNewMovesFinished);
 
-
     // Player Events
+	gameSocket.on('playerStartGame', playerStartGame);
     gameSocket.on('playerJoinGame', playerJoinGame);
     gameSocket.on('playerAnswer', playerAnswer);
     gameSocket.on('playerRestart', playerRestart);
@@ -66,7 +66,7 @@ function hostPrepareGame(gameId) {
  * @param gameId The game ID / room ID
  */
 function hostStartGame(gameId) {
-    console.log('Game Started.');
+    console.log('Game Started.' + gameId);
 	sendMoves(0, 3, gameId);
 };
 
@@ -120,7 +120,7 @@ function playerJoinGame(data) {
         // Join the room
         sock.join(data.gameId);
 
-        //console.log('Player ' + data.playerName + ' joining game: ' + data.gameId );
+        console.log('Player ' + data.playerName + ' joining game: ' + data.gameId );
 
         // Emit an event notifying the clients that the player has joined the room.
         io.sockets.in(data.gameId).emit('playerJoinedRoom', data);
@@ -129,6 +129,10 @@ function playerJoinGame(data) {
         // Otherwise, send an error message back to the player.
         this.emit('error',{message: "This room does not exist."} );
     }
+}
+
+function playerStartGame(data) {
+	io.sockets.in(data.gameId).emit('beginNewGame', data);
 }
 
 /**
@@ -162,7 +166,7 @@ function playerRestart(data) {
    ************************* */
 
 function sendMoves(round, numberOfMoves, gameId) {
-	console.log('sendMoves');
+	console.log('sendMoves' + gameId);
 	var data = generateMoves(round, numberOfMoves)
 	io.sockets.in(data.gameId).emit('newMovesData', data);
 }
