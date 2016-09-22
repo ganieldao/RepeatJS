@@ -45,6 +45,7 @@ function hostCreateNewGame() {
 
     // Join the Room and wait for the players
     this.join(thisGameId.toString());
+	console.log(io.sockets.rooms);
 };
 
 /*
@@ -72,7 +73,7 @@ function hostStartGame(gameId) {
 
 //Data contains gameId, moves, round
 function hostNewMovesFinished(data) {
-    console.log('Host finished, here the moves');
+    console.log('Host finished, here the moves' + data.gameId);
 	io.sockets.in(data.gameId).emit('playerLayoutButtons', data);
 };
 
@@ -104,7 +105,7 @@ function hostNextRound(data) {
  * @param data Contains data entered via player's input - playerName and gameId.
  */
 function playerJoinGame(data) {
-    //console.log('Player ' + data.playerName + 'attempting to join game: ' + data.gameId );
+    console.log('Player ' + data.playerName + 'attempting to join game: ' + data.gameId );
 
     // A reference to the player's Socket.IO socket object
     var sock = this;
@@ -132,6 +133,7 @@ function playerJoinGame(data) {
 }
 
 function playerStartGame(data) {
+	console.log('server to begin new game');
 	io.sockets.in(data.gameId).emit('beginNewGame', data);
 }
 
@@ -167,7 +169,13 @@ function playerRestart(data) {
 
 function sendMoves(round, numberOfMoves, gameId) {
 	console.log('sendMoves' + gameId);
-	var data = generateMoves(round, numberOfMoves)
+	var arrayOfMoves = generateMoves(round, numberOfMoves).moves;
+	var data = {
+        mySocketId : this.id,
+        gameId : gameId,
+		moves: arrayOfMoves,
+		round : round
+    };
 	io.sockets.in(data.gameId).emit('newMovesData', data);
 }
 

@@ -41,6 +41,7 @@ jQuery(function($){
          */
         onConnected : function() {
             // Cache a copy of the client's socket.IO session ID on the App
+			console.log('got on conencted');
             App.mySocketId = IO.socket.socket.sessionid;
             // console.log(data.message);
         },
@@ -50,6 +51,7 @@ jQuery(function($){
          * @param data {{ gameId: int, mySocketId: * }}
          */
         onNewGameCreated : function(data) {
+			console.log('got new game created');
             App.Host.gameInit(data);
         },
 
@@ -64,27 +66,27 @@ jQuery(function($){
             //
             // So on the 'host' browser window, the App.Host.updateWiatingScreen function is called.
             // And on the player's browser, App.Player.updateWaitingScreen is called.
+			
+			console.log('got player joined room');
+			
             App[App.myRole].updateWaitingScreen(data);
         },
 
         beginNewGame : function(data) {
+			console.log('got begin new game');
             App[App.myRole].gameCountdown(data);
         },
 		
 		onNewMovesData : function(data) {
-			console.log('onnewmoves');
+			console.log('got onnewmoves');
             // Update the current round
             App.currentRound = data.round;
 
-            // Change the word for the Host and Player
-            //App[App.myRole].newWord(data);
-
 			App[App.myRole].newMoves(data);
-			
-			console.log('onnewmovesend');
         },
 		
 		onPlayerLayoutButtons : function(data) {
+			console.log('got onplayerlayoutbuttons')
 			if(App.myRole === 'Player') {
 				App.Player.layoutButtons(data);
 			}
@@ -95,6 +97,7 @@ jQuery(function($){
          * @param data
          */
         hostCheckAnswer : function(data) {
+			console.log('got hostCheckAnswer');
             if(App.myRole === 'Host') {
                 App.Host.checkMoves(data);
             }
@@ -256,7 +259,7 @@ jQuery(function($){
                 App.Host.numPlayersInRoom = 0;
 
                 App.Host.displayNewGameScreen();
-                // console.log("Game started with ID: " + App.gameId + ' by host: ' + App.mySocketId);
+                console.log("Game started with ID: " + App.gameId + ' by host: ' + App.mySocketId);
             },
 
             /**
@@ -338,15 +341,17 @@ jQuery(function($){
 			newMoves : function(data) {				
 				var newMovesIndex = App.Host.moves.length;
 				App.Host.moves = App.Host.moves.concat(data.moves);
+				console.log('the moves' + data.moves + ' ' + data.gameId);
 				console.log(App.Host.moves);
                 App.Host.currentRound = data.round;
 				
-				var data = {
+				var newData = {
                     gameId : App.gameId,
                     round : App.currentRound,
 					moves : App.Host.moves
                 }
 				
+				console.log("newMoves" + data.gameId);
 				
 				var numberOfMoves = App.Host.moves.length;
 				var currentMove = 0;
@@ -395,7 +400,7 @@ jQuery(function($){
 							if(currentMove > numberOfMoves){
 								$('#timeLeftText').text("Repeat!");
 								clearInterval(showMovesTimer);
-								IO.socket.emit('hostNewMovesFinished', data);
+								IO.socket.emit('hostNewMovesFinished', newData);
 								return;
 							}
 						}
@@ -528,7 +533,7 @@ jQuery(function($){
              * and clicked Start.
              */
             onPlayerJoinClick: function() {
-                console.log('Player clicked "Start"');
+                console.log('Player clicked "Join"');
 
                 // collect data to send to the server
                 var data = {
@@ -545,8 +550,9 @@ jQuery(function($){
 				
 				var $btn = $(this); 
 				$btn.text('Start');
-				$btn.unbind("click");
-				//App.$doc.on('click', '#btnJoinStart', App.Player.onPlayerStartClick);
+				//$btn.off('click');
+				App.$doc.off('click', '#btnJoinStart', App.Player.onPlayerJoinClick);
+				App.$doc.on('click', '#btnJoinStart', App.Player.onPlayerStartClick);
             },
 			
 			onPlayerStartClick: function() {
@@ -623,7 +629,7 @@ jQuery(function($){
 			
 			//Layout simon says buttons
 			layoutButtons : function(data) {
-				console.log('layout buttons');
+				console.log("Layout Buttons WIth: " + App.gameId + ' by host: ' + App.mySocketId);
                 var $list = $('<ul/>').attr('id','ulAnswers');
 				
 				var numberOfButtons = [1, 2, 3 ,4];
