@@ -359,57 +359,54 @@ jQuery(function($){
 				var readySetGo = ["", "Ready", "Go!"];
 				var currentReady = 0;
 				
-				var readyTimer = setInterval(readyTimerFunction,1000);
-				
-				var pause = false;
-				
 				$('#timeLeftText').text("Preparation");
 				
 				$('#hostWord').css({
 					'color':'black'
 				});
 				
+				var readyTimer = setInterval(readyTimerFunction,1000);
+				var flag = false;
+				var pause = false;
+				
 				function readyTimerFunction() {
-					$('#hostWord').text(readySetGo[currentReady]);
-					App.doTextFit('#hostWord');
-					currentReady ++;
+					if(!flag) {
+						$('#hostWord').text(readySetGo[currentReady]);
+						App.doTextFit('#hostWord');
+						currentReady ++;
 					
-					if(currentReady > readySetGo.length) {
-						clearInterval(readyTimer);
-						$('#hostWord').text("");
-						var showMovesTimer = setInterval(showMovesTimerFunction, App.Host.speed);
-						$('#timeLeftText').text("Memorization");
-						function showMovesTimerFunction(){				
-							if(!pause) {
-								$('#hostWord').text(App.Host.moves[currentMove]);
-								App.doTextFit('#hostWord');
-								currentMove ++;
-								pause = true;
-							} else {
-								$('#hostWord').text("");
-								App.doTextFit('#hostWord');
-								pause = false;
-							}
-							
-							if(currentMove > newMovesIndex) {
-								$('#hostWord').css({
-									'color':'yellow'
-								});
-							}
-					
-							if(currentMove > numberOfMoves){
-								$('#timeLeftText').text("Repeat!");
-								clearInterval(showMovesTimer);
-								IO.socket.emit('hostNewMovesFinished', newData);
-								return;
-							}
+						if(currentReady > readySetGo.length) {
+							$('#hostWord').text("");
+							flag = true;
+							$('#timeLeftText').text("Memorization");
 						}
-						return;
+					} else {			
+						if(!pause) {
+							$('#hostWord').text(App.Host.moves[currentMove]);
+							App.doTextFit('#hostWord');
+							currentMove ++;
+							pause = true;
+						} else {
+							$('#hostWord').text("");
+							App.doTextFit('#hostWord');
+							pause = false;
+						}
+						
+						if(currentMove > newMovesIndex) {
+							$('#hostWord').css({
+								'color':'yellow'
+							});
+							App.doTextFit('#hostWord');
+						}
+					
+						if(currentMove > numberOfMoves){
+							$('#timeLeftText').text("Repeat!");
+							clearInterval(readyTimer);
+							IO.socket.emit('hostNewMovesFinished', newData);
+							return;
+						}
 					}
 				}
-				
-
-				
             },
 			
 			checkMoves : function(data) {
