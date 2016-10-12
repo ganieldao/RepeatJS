@@ -439,7 +439,7 @@ jQuery(function($){
 					});
 					
                     $('#hostWord')
-                        .append('<p>Player ' + data.playerName + ' has submitted an answer.</p>')
+                        .append('<p>' + data.playerName + ' has submitted an answer.</p>')
 									
 					App.doTextFit('#hostWord');				
 									
@@ -580,6 +580,7 @@ jQuery(function($){
 					var data = {
 						gameId: App.gameId,
 						playerId: App.mySocketId,
+						playerName: App.Player.myName,
 						moves: App.Player.playerMoves,
 						round: App.currentRound
 					}
