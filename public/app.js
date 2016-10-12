@@ -448,7 +448,7 @@ jQuery(function($){
 					if(App.Host.playersReady === App.Host.numPlayersInRoom) {
 						App.Host.playersReady = 0;
 						App.currentRound += 1;
-				   
+						
 						var data = {
 							gameId : App.gameId,
 							round : App.currentRound
