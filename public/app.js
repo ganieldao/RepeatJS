@@ -433,10 +433,18 @@ jQuery(function($){
                         $pScore.text( +$pScore.text() - 3 );
                     }
 					
+					// Update host screen
+					$('#hostWord').css({
+						'color':'black'
+					});
+					
+                    $('#hostWord')
+                        .append('<p>Player ' + data.playerName + ' has submitted an answer.</p>')
+									
+					App.doTextFit('#hostWord');				
 									
 					App.Host.playersReady ++
-					console.log(App.Host.playersReady);
-					console.log(App.Host.numPlayersInRoom);
+
 					if(App.Host.playersReady === App.Host.numPlayersInRoom) {
 						App.Host.playersReady = 0;
 						App.currentRound += 1;
@@ -577,6 +585,8 @@ jQuery(function($){
 					}
 					IO.socket.emit('playerAnswer',data);
 					App.Player.playerMoves = [];
+					$('#gameArea')
+                    .html('<div class="gameOver">Pay attention to the main screen!</div>');
 				}
 			},	
 
