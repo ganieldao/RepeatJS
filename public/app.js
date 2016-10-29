@@ -36,6 +36,8 @@ jQuery(function($){
             IO.socket.on('error', IO.error );
 			
 			IO.socket.on('answerChecked', IO.answerWasChecked);
+			
+			IO.socket.on('gameOver', IO.gameOver);
         },
 
         /**
@@ -472,15 +474,23 @@ jQuery(function($){
                     }
 
 					if(App.Host.playersReady === App.Host.numPlayersInRoom) {
-						App.Host.playersReady = 0;
-						App.currentRound += 1;
+						if(App.Host.numPlayersInRoom <= 1) {
+							var data = {
+								gameId : App.gameId,
+								round : App.currentRound
+							}
+							IO.socket.emit('gameOver', data);
+						} else {
+							App.Host.playersReady = 0;
+							App.currentRound += 1;
 
-						var data = {
-							gameId : App.gameId,
-							round : App.currentRound
+							var data = {
+								gameId : App.gameId,
+								round : App.currentRound
+							}
+
+							IO.socket.emit('hostNextRound',data);
 						}
-
-						IO.socket.emit('hostNextRound',data);
 					}
                 }
             },
@@ -490,26 +500,9 @@ jQuery(function($){
              * @param data
              */
             endGame : function(data) {
-                // Get the data for player 1 from the host screen
-                var $p1 = $('#player1Score');
-                var p1Score = +$p1.find('.score').text();
-                var p1Name = $p1.find('.playerName').text();
-
-                // Get the data for player 2 from the host screen
-                var $p2 = $('#player2Score');
-                var p2Score = +$p2.find('.score').text();
-                var p2Name = $p2.find('.playerName').text();
-
-                // Find the winner based on the scores
-                var winner = (p1Score < p2Score) ? p2Name : p1Name;
-                var tie = (p1Score === p2Score);
-
-                // Display the winner (or tie game message)
-                if(tie){
-                    $('#hostWord').text("It's a Tie!");
-                } else {
-                    $('#hostWord').text( winner + ' Wins!!' );
-                }
+				$('#timeLeftText').text('');
+                $('#hostWord').text('Game Over');
+ 
                 App.doTextFit('#hostWord');
 
                 // Reset game data
@@ -543,7 +536,7 @@ jQuery(function($){
              */
             myName: '',
 
-			canAnswer: false,
+			canAnswer: true,
 
 			playerMoves: [],
 
@@ -702,15 +695,7 @@ jQuery(function($){
              * Show the "Game Over" screen.
              */
             endGame : function() {
-                $('#gameArea')
-                    .html('<div class="gameOver">Game Over!</div>')
-                    .append(
-                        // Create a button to start a new game.
-                        $('<button>Start Again</button>')
-                            .attr('id','btnPlayerRestart')
-                            .addClass('btn')
-                            .addClass('btnGameOver')
-                    );
+  
             }
         },
 

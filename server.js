@@ -18,7 +18,7 @@ exports.initGame = function(sio, socket){
     gameSocket.on('hostCountdownFinished', hostStartGame);
     gameSocket.on('hostNextRound', hostNextRound);
 
-	  gameSocket.on('hostNewMovesFinished', hostNewMovesFinished);
+	gameSocket.on('hostNewMovesFinished', hostNewMovesFinished);
 
     // Player Events
 	gameSocket.on('playerStartGame', playerStartGame);
@@ -26,6 +26,8 @@ exports.initGame = function(sio, socket){
     gameSocket.on('playerAnswer', playerAnswer);
     gameSocket.on('playerRestart', playerRestart);
 	gameSocket.on('playerAnswerChecked', playerAnswerChecked);
+	
+	gameSocket.on('gameOver', gameOver);
 }
 
 /* *******************************
@@ -164,6 +166,10 @@ function playerRestart(data) {
 
 function playerAnswerChecked(data) {
 	io.sockets.in(data.gameId).emit('answerChecked', data);
+}
+
+function gameOver(data) {
+	io.sockets.in(data.gameId).emit('gameOver', data);
 }
 
 /* *************************
