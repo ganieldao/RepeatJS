@@ -1,5 +1,5 @@
 ;
-jQuery(function($){    
+jQuery(function($){
     'use strict';
 
     /**
@@ -27,13 +27,15 @@ jQuery(function($){
             IO.socket.on('newGameCreated', IO.onNewGameCreated );
             IO.socket.on('playerJoinedRoom', IO.playerJoinedRoom );
             IO.socket.on('beginNewGame', IO.beginNewGame );
-			
+
 			IO.socket.on('newMovesData', IO.onNewMovesData);
 			IO.socket.on('playerLayoutButtons', IO.onPlayerLayoutButtons);
-			
+
             IO.socket.on('hostCheckAnswer', IO.hostCheckAnswer);
             IO.socket.on('gameOver', IO.gameOver);
             IO.socket.on('error', IO.error );
+			
+			IO.socket.on('answerChecked', IO.answerWasChecked);
         },
 
         /**
@@ -41,7 +43,7 @@ jQuery(function($){
          */
         onConnected : function() {
             // Cache a copy of the client's socket.IO session ID on the App
-			console.log('got on conencted');
+			console.log('got on connected');
             App.mySocketId = IO.socket.socket.sessionid;
             // console.log(data.message);
         },
@@ -66,9 +68,9 @@ jQuery(function($){
             //
             // So on the 'host' browser window, the App.Host.updateWiatingScreen function is called.
             // And on the player's browser, App.Player.updateWaitingScreen is called.
-			
+
 			console.log('got player joined room');
-			
+
             App[App.myRole].updateWaitingScreen(data);
         },
 
@@ -76,7 +78,7 @@ jQuery(function($){
 			console.log('got begin new game');
             App[App.myRole].gameCountdown(data);
         },
-		
+
 		onNewMovesData : function(data) {
 			console.log('got onnewmoves');
             // Update the current round
@@ -84,7 +86,7 @@ jQuery(function($){
 
 			App[App.myRole].newMoves(data);
         },
-		
+
 		onPlayerLayoutButtons : function(data) {
 			console.log('got onplayerlayoutbuttons')
 			if(App.myRole === 'Player') {
@@ -102,6 +104,13 @@ jQuery(function($){
                 App.Host.checkMoves(data);
             }
         },
+		
+		answerWasChecked: function(data) {
+			console.log(data.playerId + " " + App.Player.myName)
+			if(App.myRole === 'Player' && data.playerId == App.mySocketId) {
+				App.Player.onAnswerChecked(data);
+			}
+		},
 
         /**
          * Let everyone know the game has ended.
@@ -147,7 +156,7 @@ jQuery(function($){
          * to the array of word data stored on the server.
          */
         currentRound: 0,
-		
+
 		maxPlayers: 5,
 
         /* *************************************
@@ -217,8 +226,8 @@ jQuery(function($){
              * Contains references to player data
              */
             players : [],
-			
-			playersReady: 0,
+
+			      playersReady: 0,
 
             /**
              * Flag to indicate if a new game is starting.
@@ -231,15 +240,15 @@ jQuery(function($){
              * Keep track of the number of players that have joined the game.
              */
             numPlayersInRoom: 0,
-			
-			/**
+
+			       /**
              * Simon's moves.
              */
-			
-			moves : [],
-			
-			speed : 1000,
-			
+
+			      moves : [],
+
+			      speed : 1000,
+
             /**
              * Handler for the "Start" button on the Title Screen.
              */
@@ -296,7 +305,7 @@ jQuery(function($){
 
                 // Increment the number of players in the room
                 App.Host.numPlayersInRoom += 1;
-				console.log("players" + App.Host.numPlayersInRoom);
+				        console.log("players" + App.Host.numPlayersInRoom);
 
                 // If two players have joined, start the game!
                 if (App.Host.numPlayersInRoom === App.maxPlayers) {
@@ -321,7 +330,7 @@ jQuery(function($){
                 App.countDown( $secondsLeft, 5, function(){
                     IO.socket.emit('hostCountdownFinished', App.gameId);
                 });
-				
+
 				$('#timeLeftText').text("");
 
                 /*// Display the players' names on screen
@@ -337,50 +346,50 @@ jQuery(function($){
                 $('#player1Score').find('.score').attr('id',App.Host.players[0].mySocketId);
                 $('#player2Score').find('.score').attr('id',App.Host.players[1].mySocketId);*/
             },
-			
-			newMoves : function(data) {				
+
+			newMoves : function(data) {
 				var newMovesIndex = App.Host.moves.length;
 				App.Host.moves = App.Host.moves.concat(data.moves);
 				console.log('the moves' + data.moves + ' ' + data.gameId);
 				console.log(App.Host.moves);
                 App.Host.currentRound = data.round;
-				
+
 				var newData = {
                     gameId : App.gameId,
                     round : App.currentRound,
 					moves : App.Host.moves
                 }
-				
+
 				console.log("newMoves" + data.gameId);
-				
+
 				var numberOfMoves = App.Host.moves.length;
 				var currentMove = 0;
-				
+
 				var readySetGo = ["", "Ready", "Go!"];
 				var currentReady = 0;
-				
+
 				$('#timeLeftText').text("Preparation");
-				
+
 				$('#hostWord').css({
 					'color':'black'
 				});
-				
+
 				var readyTimer = setInterval(readyTimerFunction,1000);
 				var flag = false;
 				var pause = false;
-				
+
 				function readyTimerFunction() {
 					if(!flag) {
 						$('#hostWord').text(readySetGo[currentReady]);
 						App.doTextFit('#hostWord');
 						currentReady ++;
-					
+
 						if(currentReady > readySetGo.length) {
 							$('#hostWord').text("");
 							flag = true;
 							$('#timeLeftText').text("Memorization");
 						}
-					} else {			
+					} else {
 						if(!pause) {
 							$('#hostWord').text(App.Host.moves[currentMove]);
 							App.doTextFit('#hostWord');
@@ -391,14 +400,14 @@ jQuery(function($){
 							App.doTextFit('#hostWord');
 							pause = false;
 						}
-						
+
 						if(currentMove > newMovesIndex) {
 							$('#hostWord').css({
 								'color':'yellow'
 							});
 							App.doTextFit('#hostWord');
 						}
-					
+
 						if(currentMove > numberOfMoves){
 							$('#timeLeftText').text("Repeat!");
 							clearInterval(readyTimer);
@@ -408,7 +417,7 @@ jQuery(function($){
 					}
 				}
             },
-			
+
 			checkMoves : function(data) {
                 // Verify that the answer clicked is from the current round.
                 // This prevents a 'late entry' from a player whos screen has not
@@ -418,37 +427,54 @@ jQuery(function($){
 					console.log('round pass');
                     // Get the player's score
                     var $pScore = $('#' + data.playerId);
-					
-					console.log(App.Host.moves);
-					console.log(data.moves);
-                    // Advance player's score if it is correct
-                    if( App.Host.moves.toString() === data.moves.toString() ) {
-						console.log('correct');
-                        // Add 5 to the player's score
-                        $pScore.text( +$pScore.text() + 5 );
 
-                    } else {
-                        // A wrong answer was submitted, so decrement the player's score.
-						console.log('wrong');
-                        $pScore.text( +$pScore.text() - 3 );
-                    }
+					console.log(App.Host.moves);
+					console.log(data.moves);		
 					
 					// Update host screen
 					$('#hostWord').css({
 						'color':'black'
 					});
-					
+
                     $('#hostWord')
                         .append('<p>' + data.playerName + ' has submitted an answer.</p>')
-									
-					App.doTextFit('#hostWord');				
-									
-					App.Host.playersReady ++
+
+					App.doTextFit('#hostWord');
+					
+                    // Advance player's score if it is correct
+                    if( App.Host.moves.toString() === data.moves.toString() ) {
+						console.log('correct');
+                        // Add 5 to the player's score
+                        App.Host.playersReady ++;
+											
+						var resultData = {
+							gameId : App.gameId,
+							round : App.currentRound,
+							correct : 1,
+							playerId : data.playerId
+						}
+						
+						IO.socket.emit('playerAnswerChecked', resultData);
+
+                    } else {
+                        // A wrong answer was submitted, so decrement the player's score.
+						console.log('wrong');
+                        App.Host.numPlayersInRoom --;
+										
+						var resultData = {
+							gameId : App.gameId,
+							round : App.currentRound,
+							correct : 0,
+							playerId : data.playerId
+						}
+						
+						IO.socket.emit('playerAnswerChecked', resultData);
+                    }
 
 					if(App.Host.playersReady === App.Host.numPlayersInRoom) {
 						App.Host.playersReady = 0;
 						App.currentRound += 1;
-						
+
 						var data = {
 							gameId : App.gameId,
 							round : App.currentRound
@@ -516,13 +542,13 @@ jQuery(function($){
              * The player's name entered on the 'Join' screen.
              */
             myName: '',
-			
+
 			canAnswer: false,
-			
+
 			playerMoves: [],
-			
+
 			numberOfMoves: '',
-			
+
             /**
              * Click handler for the 'JOIN' button
              */
@@ -552,14 +578,14 @@ jQuery(function($){
                 // Set the appropriate properties for the current player.
                 App.myRole = 'Player';
                 App.Player.myName = data.playerName;
-				
-				var $btn = $(this); 
+
+				var $btn = $(this);
 				$btn.text('Start');
 				//$btn.off('click');
 				App.$doc.off('click', '#btnJoinStart', App.Player.onPlayerJoinClick);
 				App.$doc.on('click', '#btnJoinStart', App.Player.onPlayerStartClick);
             },
-			
+
 			onPlayerStartClick: function() {
 				var data = {
                     gameId : +($('#inputGameId').val()),
@@ -568,11 +594,22 @@ jQuery(function($){
 				IO.socket.emit('playerStartGame', data);
 			},
 			
+			onAnswerChecked: function(data) {
+				if(data.correct == 0) {
+					$('#gameArea')
+					.html('<div class="gameOver">Game Over!</div>');
+					stillIn = false;
+				} else {
+					$('#gameArea')
+					.html('<div class="gameOver">Correct!</div>');
+				}
+			},
+
 			onPlayerButtonClick: function() {
 				console.log('Clicked Answer Button');
                 var $btn = $(this);      // the tapped button
                 var answer = $btn.val(); // The tapped word
-				
+
 				App.Player.playerMoves.push(parseInt(answer));
 				console.log(App.Player.playerMoves.length);
 				if(App.Player.playerMoves.length == App.Player.numberOfMoves) {
@@ -589,7 +626,7 @@ jQuery(function($){
 					$('#gameArea')
                     .html('<div class="gameOver">Pay attention to the main screen!</div>');
 				}
-			},	
+			},
 
             /**
              *  Click handler for the "Start Again" button that appears
@@ -628,36 +665,36 @@ jQuery(function($){
                 App.Player.hostSocketId = hostData.mySocketId;
                 $('#gameArea')
                     .html('<div class="gameOver">Get Ready!</div>');
-            },	
-			
+            },
+
 			newMoves : function(data) {
 				 $('#gameArea')
                     .html('<div class="gameOver">Pay attention to the main screen!</div>');
 			},
-			
+
 			//Layout simon says buttons
 			layoutButtons : function(data) {
 				console.log("Layout Buttons WIth: " + App.gameId + ' by host: ' + App.mySocketId);
                 var $list = $('<ul/>').attr('id','ulAnswers');
-				
+
 				var numberOfButtons = [1, 2, 3 ,4];
-				
+
 				App.Player.numberOfMoves = data.moves.length;
-				
+
 				console.log('layout buttons length' + App.Player.numberOfMoves);
-				
+
                 $.each(numberOfButtons, function(){
-                    $list                         
-                        .append( $('<li/>')          
-                            .append( $('<button/>')     
-                                .addClass('btnAnswer')  
+                    $list
+                        .append( $('<li/>')
+                            .append( $('<button/>')
+                                .addClass('btnAnswer')
                                 .addClass('btn')
 								.val(this)
-                                .html(this)      
+                                .html(this)
                             )
                         )
                 });
-				
+
                 $('#gameArea').html($list);
             },
 

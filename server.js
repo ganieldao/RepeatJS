@@ -17,14 +17,15 @@ exports.initGame = function(sio, socket){
     gameSocket.on('hostRoomFull', hostPrepareGame);
     gameSocket.on('hostCountdownFinished', hostStartGame);
     gameSocket.on('hostNextRound', hostNextRound);
-	
-	gameSocket.on('hostNewMovesFinished', hostNewMovesFinished);
+
+	  gameSocket.on('hostNewMovesFinished', hostNewMovesFinished);
 
     // Player Events
 	gameSocket.on('playerStartGame', playerStartGame);
     gameSocket.on('playerJoinGame', playerJoinGame);
     gameSocket.on('playerAnswer', playerAnswer);
     gameSocket.on('playerRestart', playerRestart);
+	gameSocket.on('playerAnswerChecked', playerAnswerChecked);
 }
 
 /* *******************************
@@ -45,7 +46,7 @@ function hostCreateNewGame() {
 
     // Join the Room and wait for the players
     this.join(thisGameId.toString());
-	console.log(io.sockets.rooms);
+	  console.log(io.sockets.rooms);
 };
 
 /*
@@ -67,8 +68,8 @@ function hostPrepareGame(gameId) {
  * @param gameId The game ID / room ID
  */
 function hostStartGame(gameId) {
-    console.log('Game Started.' + gameId);
-	sendMoves(0, 3, gameId);
+  console.log('Game Started.' + gameId);
+  sendMoves(0, 3, gameId);
 };
 
 //Data contains gameId, moves, round
@@ -89,7 +90,7 @@ function hostNextRound(data) {
         // If the current round exceeds the number of words, send the 'gameOver' event.
         io.sockets.in(data.gameId).emit('gameOver',data);
     }*/
-	
+
 	sendMoves(data.round, data.round, data.gameId);
 }
 /* *****************************
@@ -161,6 +162,10 @@ function playerRestart(data) {
     io.sockets.in(data.gameId).emit('playerJoinedRoom',data);
 }
 
+function playerAnswerChecked(data) {
+	io.sockets.in(data.gameId).emit('answerChecked', data);
+}
+
 /* *************************
    *                       *
    *      GAME LOGIC       *
@@ -184,7 +189,7 @@ function generateMoves(round, numberOfMoves) {
 	for(i = 0; i < numberOfMoves; i ++) {
 		newMoves[i] = Math.floor(Math.random() * 4) + 1;
 	}
-	
+
 	var data = {
 		moves: newMoves,
 		round:round
